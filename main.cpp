@@ -7,14 +7,23 @@
 
 using namespace std;
 
+void incrementingString(char*);
+
 //size_t writeCbk(char *ptr, size_t size, size_t nmemb, void *userdata);
 size_t writeCbk(char *ptr, size_t size, size_t nmemb, void *userdata){
 	
 	ofstream htmlFile;
+	string fileNameComplete = "part";
 	
-	htmlFile.open("test1.html");
+	char fileName[2];
+	incrementingString(fileName);
 	
-	for(int c = 0;c<(nmemb*size);c++){
+	fileNameComplete+=fileName;
+	fileNameComplete+=".txt";
+		
+	htmlFile.open(fileNameComplete);
+	
+	for(long long c = 0;c<(nmemb*size);c++){
 		htmlFile << ptr[c];
 			
 	}
@@ -57,7 +66,30 @@ int main(){
 	cout << "URL you entered:" << urlAdd << " (urlAdd)\n";
 	URL = urlAdd;
 
-	url2html(myCUrl, URL);
+	//Below is custom function for performing .html file generating directly from a URL string
+	//url2html(myCUrl, URL);
+	
+	//Trying directly with c-string here
+	curl_easy_setopt(myCUrl,CURLOPT_URL,urlAdd);
+	curl_easy_setopt(myCUrl,CURLOPT_WRITEFUNCTION,writeCbk);
+	
+	curl_easy_perform(myCUrl);
+	
+	curl_easy_cleanup(myCUrl);
 	
 	return 0;
+}
+
+void incrementingString(char* string){
+	
+	//Must start at 48. Performs conversion of value, not of character
+	static int fileCount = 48;
+	
+	char fileCountChar;
+	fileCountChar = static_cast<char>(fileCount);
+	
+	string[0] = fileCountChar;
+	string[1] = '\0';
+	
+	fileCount++;
 }
