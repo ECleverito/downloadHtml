@@ -3,24 +3,22 @@
 #include <stdlib.h>
 #include <limits>
 #include <fstream>
+#include <string>
 #include <curl/curl.h>
 
 using namespace std;
 
-void incrementingString(char*);
-
 //size_t writeCbk(char *ptr, size_t size, size_t nmemb, void *userdata);
 size_t writeCbk(char *ptr, size_t size, size_t nmemb, void *userdata){
 	
-	ofstream htmlFile;
-	string fileNameComplete = "part";
+	//Initialize html chunk number statically then iterate
+	static int fileCount = 0;
 	
-	char fileName[2];
-	incrementingString(fileName);
-	
-	fileNameComplete+=fileName;
-	fileNameComplete+=".txt";
+	//Create output file object and its name
+	ofstream htmlFile();
+	string fileNameComplete = "part"+ to_string(++fileCount) + ".txt";
 		
+	//Open each chunk of file for writing
 	htmlFile.open(fileNameComplete);
 	
 	for(long long c = 0;c<(nmemb*size);c++){
@@ -51,8 +49,8 @@ int main(){
 	//Create a curl object
 	CURL* myCUrl;
 	
-	char urlAdd[256];
-	string URL; //Holds actual URL from user and is always equal to getline target
+	//String for holding URL
+	string URL;
 	
 	//Initialize properly
 	curl_global_init(CURL_GLOBAL_ALL);
@@ -61,16 +59,15 @@ int main(){
 	//User greeting and URL query
 	cout << "Enter the URL of the website you would like the .html file from: ";
 	
-	cin.getline(urlAdd,numeric_limits<streamsize>::max());
+	getline(cin,URL);
 	
-	cout << "URL you entered:" << urlAdd << " (urlAdd)\n";
-	URL = urlAdd;
+	cout << "URL you entered:" << URL << " (URL)\n";
 
 	//Below is custom function for performing .html file generating directly from a URL string
 	//url2html(myCUrl, URL);
 	
 	//Trying directly with c-string here
-	curl_easy_setopt(myCUrl,CURLOPT_URL,urlAdd);
+	curl_easy_setopt(myCUrl,CURLOPT_URL,URL.c_str());
 	curl_easy_setopt(myCUrl,CURLOPT_WRITEFUNCTION,writeCbk);
 	
 	curl_easy_perform(myCUrl);
@@ -78,18 +75,4 @@ int main(){
 	curl_easy_cleanup(myCUrl);
 	
 	return 0;
-}
-
-void incrementingString(char* string){
-	
-	//Must start at 48. Performs conversion of value, not of character
-	static int fileCount = 48;
-	
-	char fileCountChar;
-	fileCountChar = static_cast<char>(fileCount);
-	
-	string[0] = fileCountChar;
-	string[1] = '\0';
-	
-	fileCount++;
 }
