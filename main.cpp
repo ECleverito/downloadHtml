@@ -5,17 +5,22 @@
 #include <fstream>
 #include <string>
 #include <curl/curl.h>
+#include <cstdlib>
 
 using namespace std;
 
-//size_t writeCbk(char *ptr, size_t size, size_t nmemb, void *userdata);
+//Initialize html chunk number statically then iterate
+static int fileCount = 0;
+
+//Parses contents of ifstream that gets passed as reference for instances of
+//element passed in as string. Writes contents of said element to individual
+//files that will be called "script" + # + ".txt"
+void scriptParser(ifstream&,string);
+
 size_t writeCbk(char *ptr, size_t size, size_t nmemb, void *userdata){
 	
-	//Initialize html chunk number statically then iterate
-	static int fileCount = 0;
-	
 	//Create output file object and its name
-	ofstream htmlFile();
+	ofstream htmlFile;
 	string fileNameComplete = "part"+ to_string(++fileCount) + ".txt";
 		
 	//Open each chunk of file for writing
@@ -74,5 +79,81 @@ int main(){
 	
 	curl_easy_cleanup(myCUrl);
 	
+	//Parsing files for <script> elements and writing each one to a new file
+	ifstream htmlChunk;
+	
 	return 0;
 }
+
+//Parses contents of ifstream that gets passed as reference for instances of
+//element passed in as string. Writes contents of said element to individual
+//files that will be called "script" + # + ".txt"
+void scriptParser(ifstream& htmlChunk, string elementType){
+	
+	int scriptFileCnt = 0;
+	
+	ofstream scriptFile;
+	
+	string lineString,
+	string thisElement;
+	
+	char searchChar,
+	char* charItr;
+	
+	int n = 0;
+	htmlChunk.open("part"+to_string(++n)+".txt");
+	
+	do{
+		
+		if(!hmtlChunk.eofbit()){
+			htmlChunk.close();
+			if(n!=fileCount)
+				htmlChunk.open("part"+to_string(++n)+".txt");
+			else
+				exit(EXIT_SUCCESS);
+				
+		}
+		
+		getline(htmlChunk,lineString);
+
+		if(lineString[0]=='<'){
+				
+			if(lineString.substr(1,elementType.length())==elementType){
+					
+				scriptFile.open(elemntType+to_string(++scriptFileCnt)+".txt");
+					
+				getline(htmlChunk,lineString);
+				
+				while(lineString!="</script>"){
+						
+					if(!hmtlChunk.eofbit()){
+						htmlChunk.close();
+						if(n!=fileCount)
+							htmlChunk.open("part"+to_string(++n)+".txt");
+						else
+							exit(EXIT_SUCCESS);	
+					}
+						
+					scriptFile << lineString;
+					
+					getline(htmlChunk,lineString);
+						
+				}
+				scriptFile.close();
+					
+			}
+				
+		}
+			
+
+		}while(n<=fileCount);
+	}
+	
+}
+
+// void getLineWithCheck(istream& stream,string& string){
+//
+// 	getline(stream,string);
+// 	if(stream.eofbit()){}
+//
+// }
